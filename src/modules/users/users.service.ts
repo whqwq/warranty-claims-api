@@ -31,6 +31,14 @@ export class UsersService {
     return user;
   }
 
+  async findUserByUsername(username: string): Promise<User> {
+    const user = await this.userModel.findOne({ username }).exec();
+    if (!user) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+    return user;
+  }
+
   async updateUser(id: string, updateUserDto: UpdateUserDto): Promise<User> {
     const salt = await bcrypt.genSalt(10);
     updateUserDto.password = await bcrypt.hash(updateUserDto.password, salt);
