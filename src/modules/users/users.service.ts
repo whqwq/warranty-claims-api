@@ -13,15 +13,6 @@ export class UsersService {
   ) {}
 
   async createUser(createUserDto: CreateUserDto): Promise<User> {
-    if (!createUserDto.password || createUserDto.password.trim() === '') {
-      throw new HttpException(
-        {
-          status: HttpStatus.BAD_REQUEST,
-          error: 'Password required!',
-        },
-        HttpStatus.BAD_REQUEST,
-      );
-    }
     const salt = await bcrypt.genSalt(10);
     createUserDto.password = await bcrypt.hash(createUserDto.password, salt);
     const newUser = new this.userModel(createUserDto);
