@@ -6,6 +6,9 @@ import {
   Patch,
   Param,
   Delete,
+  Request,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -16,7 +19,10 @@ export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   @Post()
-  create(@Body() createProductDto: CreateProductDto) {
+  create(@Request() req, @Body() createProductDto: CreateProductDto) {
+    if (req.user.role !== 'staff') {
+      throw new HttpException('unauthorized!', HttpStatus.UNAUTHORIZED);
+    }
     return this.productsService.createProduct(createProductDto);
   }
 
@@ -31,12 +37,22 @@ export class ProductsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
+  update(
+    @Request() req,
+    @Param('id') id: string,
+    @Body() updateProductDto: UpdateProductDto,
+  ) {
+    if (req.user.role !== 'staff') {
+      throw new HttpException('unauthorized!', HttpStatus.UNAUTHORIZED);
+    }
     return this.productsService.updateProduct(id, updateProductDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  remove(@Request() req, @Param('id') id: string) {
+    if (req.user.role !== 'staff') {
+      throw new HttpException('unauthorized!', HttpStatus.UNAUTHORIZED);
+    }
     return this.productsService.deleteProduct(id);
   }
 }

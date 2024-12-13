@@ -6,6 +6,9 @@ import {
   Patch,
   Param,
   Delete,
+  Request,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import { ClaimsService } from './claims.service';
 import { CreateClaimDto } from './dto/create-claim.dto';
@@ -16,37 +19,69 @@ export class ClaimsController {
   constructor(private readonly claimsService: ClaimsService) {}
 
   @Post()
-  create(@Body() createClaimDto: CreateClaimDto) {
+  create(@Request() req, @Body() createClaimDto: CreateClaimDto) {
+    if (req.user.role !== 'customer') {
+      throw new HttpException(
+        'only customer make claim!',
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
     return this.claimsService.createClaim(createClaimDto);
   }
 
   @Get()
-  findAll() {
+  findAll(@Request() req) {
+    if (req.user.role !== 'staff') {
+      throw new HttpException('unauthorized!', HttpStatus.UNAUTHORIZED);
+    }
     return this.claimsService.findAllClaims();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.claimsService.findClaimById(id);
+  findOne(@Request() req, @Param('id') id: string) {
+    return this.claimsService.findClaimById(req.user, id);
   }
 
   @Get('user/:userId')
-  findAllByUserId(@Param('userId') userId: string) {
+  findAllByUserId(@Request() req, @Param('userId') userId: string) {
+    if (req.user.id !== userId) {
+      throw new HttpException(
+        'cannot see others claims!',
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
     return this.claimsService.findClaimsByUserId(userId);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateClaimDto: UpdateClaimDto) {
+  update(
+    @Request() req,
+    @Param('id') id: string,
+    @Body() updateClaimDto: UpdateClaimDto,
+  ) {
+    if (req.user.role !== 'staff') {
+      throw new HttpException('unauthorized!', HttpStatus.UNAUTHORIZED);
+    }
     return this.claimsService.updateClaim(id, updateClaimDto);
   }
 
   @Patch(':id/approve')
-  approve(@Param('id') id: string) {
+  approve(@Request() req, @Param('id') id: string) {
+    if (req.user.role !== 'staff') {
+      throw new HttpException('unauthorized!', HttpStatus.UNAUTHORIZED);
+    }
     return this.claimsService.updateClaim(id, { status: 'approved' });
   }
 
   @Patch(':id/reject')
-  reject(@Param('id') id: string, @Body() rejectReason: { content: string }) {
+  reject(
+    @Request() req,
+    @Param('id') id: string,
+    @Body() rejectReason: { content: string },
+  ) {
+    if (req.user.role !== 'staff') {
+      throw new HttpException('unauthorized!', HttpStatus.UNAUTHORIZED);
+    }
     return this.claimsService.updateClaim(id, {
       status: 'rejected',
       reply: rejectReason.content,
@@ -54,7 +89,10 @@ export class ClaimsController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  remove(@Request() req, @Param('id') id: string) {
+    if (req.user.role !== 'staff') {
+      throw new HttpException('unauthorized!', HttpStatus.UNAUTHORIZED);
+    }
     return this.claimsService.deleteClaim(id);
   }
 }

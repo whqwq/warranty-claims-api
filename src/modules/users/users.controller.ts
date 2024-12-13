@@ -6,15 +6,20 @@ import {
   Patch,
   Param,
   Delete,
+  Request,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { Public } from 'src/common/decorators/auth-decorators';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+  @Public()
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.createUser(createUserDto);
@@ -26,22 +31,38 @@ export class UsersController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  findOne(@Request() req, @Param('id') id: string) {
+    if (req.user.id !== id && req.user.role !== 'staff') {
+      throw new HttpException('unauthorized!', HttpStatus.UNAUTHORIZED);
+    }
     return this.usersService.findUserById(id);
   }
 
   @Get('username/:username')
-  findByUsername(@Param('username') username: string) {
+  findByUsername(@Request() req, @Param('username') username: string) {
+    if (req.user.username !== username && req.user.role !== 'staff') {
+      throw new HttpException('unauthorized!', HttpStatus.UNAUTHORIZED);
+    }
     return this.usersService.findUserByUsername(username);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+  update(
+    @Request() req,
+    @Param('id') id: string,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
+    if (req.user.id !== id) {
+      throw new HttpException('unauthorized!', HttpStatus.UNAUTHORIZED);
+    }
     return this.usersService.updateUser(id, updateUserDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  remove(@Request() req, @Param('id') id: string) {
+    if (req.user.id !== id && req.user.role !== 'staff') {
+      throw new HttpException('unauthorized!', HttpStatus.UNAUTHORIZED);
+    }
     return this.usersService.deleteUser(id);
   }
 }

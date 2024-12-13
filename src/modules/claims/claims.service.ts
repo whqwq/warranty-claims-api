@@ -34,10 +34,13 @@ export class ClaimsService {
     return this.claimModel.find().exec();
   }
 
-  async findClaimById(id: string): Promise<Claim> {
+  async findClaimById(user: any, id: string): Promise<Claim> {
     const claim = await this.claimModel.findById(id).exec();
     if (!claim) {
       throw new HttpException('Claim not found', HttpStatus.NOT_FOUND);
+    }
+    if (claim.userId !== user.id) {
+      throw new HttpException('not your claim!', HttpStatus.UNAUTHORIZED);
     }
     return claim;
   }
