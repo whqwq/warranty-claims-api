@@ -30,6 +30,11 @@ export class UsersController {
     return this.usersService.findUserById(id);
   }
 
+  @Get('username/:username')
+  findByUsername(@Param('username') username: string) {
+    return this.usersService.findUserByUsername(username);
+  }
+
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.updateUser(id, updateUserDto);

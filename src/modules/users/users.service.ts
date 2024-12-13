@@ -40,8 +40,10 @@ export class UsersService {
   }
 
   async updateUser(id: string, updateUserDto: UpdateUserDto): Promise<User> {
-    const salt = await bcrypt.genSalt(10);
-    updateUserDto.password = await bcrypt.hash(updateUserDto.password, salt);
+    if (updateUserDto.password) {
+      const salt = await bcrypt.genSalt(10);
+      updateUserDto.password = await bcrypt.hash(updateUserDto.password, salt);
+    }
     const updatedUser = await this.userModel
       .findByIdAndUpdate(id, updateUserDto, { new: true })
       .exec();
