@@ -1,0 +1,26 @@
+services:
+  warranty-claims-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: warranty-claims-api
+    ports:
+      - "8300:8300"
+    environment:
+      - NODE_ENV=production
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    depends_on:
+      - mongo
+
+  mongo:
+    image: mongo
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+volumes:
+  mongo_data:

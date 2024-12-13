@@ -12,7 +12,7 @@ import { JwtAuthGuard } from './modules/auth/jwt-auth.guard';
 
 @Module({
   imports: [
-    MongooseModule.forRoot('mongodb://localhost:27017/warranty'),
+    MongooseModule.forRoot('mongodb://mongo:27017/warranty'),
     ProductsModule,
     UsersModule,
     ClaimsModule,
