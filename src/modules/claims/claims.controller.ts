@@ -13,7 +13,9 @@ import {
 import { ClaimsService } from './claims.service';
 import { CreateClaimDto } from './dto/create-claim.dto';
 import { UpdateClaimDto } from './dto/update-claim.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('claims')
 @Controller('claims')
 export class ClaimsController {
   constructor(private readonly claimsService: ClaimsService) {}
